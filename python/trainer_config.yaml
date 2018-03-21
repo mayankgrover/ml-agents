@@ -24,6 +24,14 @@ BananaBrain:
     beta: 5.0e-3
     buffer_size: 10240
 
+HumanoidBrain:
+    normalize: true
+    batch_size: 2048
+    max_steps: 5.0e6
+    gamma: 0.995
+    # beta: 5.0e-3
+    buffer_size: 10240
+
 PushBlockBrain:
     max_steps: 5.0e4
     batch_size: 128
