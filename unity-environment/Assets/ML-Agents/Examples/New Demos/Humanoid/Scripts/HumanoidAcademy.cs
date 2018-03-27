@@ -21,6 +21,8 @@ public class HumanoidAcademy : Academy {
 	public float standingStrength;
 	CameraFollow cameraFollow;
 	public bool resetPositionOnFail;
+	public float angularVelTarget;
+	public float maxAngularVelocity;
 	// public Transform spawnPoint1;
 	// Use this for initialization
 	void Start () {

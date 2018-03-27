@@ -51,7 +51,7 @@ public class HumanoidAgent : Agent {
 			// 	jd .maximumForce =1000;
 			// 	joint.slerpDrive = jd;
 			// }
-			rb.maxAngularVelocity = 15;
+			rb.maxAngularVelocity = 30;
 			// rb.mass = 1;
 			rb.drag = .5f;
 			rb.angularDrag = .5f;
@@ -88,6 +88,17 @@ public class HumanoidAgent : Agent {
 		// foreach(Rigidbody rb in allBodyParts)
 		foreach(Rigidbody rb in moveableBodyParts)
 		{
+			// ConfigurableJoint joint = rb.gameObject.GetComponent<ConfigurableJoint>();
+			// if (joint)
+			// {
+			// 	print("current force: " + joint.currentForce.sqrMagnitude);
+			// 	print("current torque: " + joint.currentTorque.sqrMagnitude);
+			// 	// JointDrive jd = new JointDrive();
+			// 	// jd .positionSpring =10;
+			// 	// jd.positionDamper = 0;
+			// 	// jd .maximumForce =1000;
+			// 	// joint.slerpDrive = jd;
+			// }
 			// if(rb)
 			// MLAgentsHelpers.CollectVector3State(state, rb.transform.position);
 			// AddVectorObs(rb.transform.localPosition);
@@ -152,6 +163,27 @@ public class HumanoidAgent : Agent {
 
 	// }
 
+	// void MoveVelocityTowards(Vector3 targetPos, Rigidbody rb, AnimationCurve curve, float curveTimer, float targetVel, float maxVel)
+	// void MoveVelocityTowards(Vector3 targetPos, Rigidbody rb)
+	// {
+	// 	Vector3 moveToPos = targetPos - rb.worldCenterOfMass;  //cube needs to go to the standard Pos
+	// 	Vector3 velocityTarget = (moveToPos * targetVel * curve.Evaluate(curveTimer)) * Time.deltaTime; //not sure of the logic here, but it modifies velTarget
+	// 	if (float.IsNaN(velocityTarget.x) == false)
+	// 	{
+	// 		rb.velocity = Vector3.MoveTowards(rb.velocity, velocityTarget, maxVel);
+	// 	}
+	// }
+
+	void MoveAngularVelocityTowards(Vector3 targetPos, Rigidbody rb)
+	{
+		Vector3 moveToPos = targetPos - rb.worldCenterOfMass;  //target pos
+		Vector3 moveVector = (moveToPos * academy.angularVelTarget) * Time.deltaTime; 
+		if (float.IsNaN(moveVector.x) == false) //sanity check
+		{
+			rb.angularVelocity = Vector3.MoveTowards(rb.angularVelocity, moveVector, academy.maxAngularVelocity);
+		}
+	}
+
 	void MoveAgent(float[] vectorAction)
 	{
 		// int actionLength = vectorAction.Length;
@@ -165,14 +197,14 @@ public class HumanoidAgent : Agent {
 		{
 			var rb = moveableBodyParts[x];
 
-
-				rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 3], -1, 1), ForceMode.VelocityChange);
-				rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.VelocityChange);
-				rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 2], -1, 1), ForceMode.VelocityChange);
+				// Vector3 torqueRight = Vector3.Lerp(startMarker.position, endMarker.position, fracJourney)
+				rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 3], -1, 1), ForceMode.Force);
+				rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.Force);
+				rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 2], -1, 1), ForceMode.Force);
 					// rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
 				// reward -= (Mathf.Abs(act[x * 3] + act[(x * 3) + 1] +  act[(x * 3) + 2]))/1000;
 				
-				AddReward(-((Mathf.Abs(vectorAction[x * 3]) + Mathf.Abs(vectorAction[(x * 3) + 1]) + Mathf.Abs(vectorAction[(x * 3) + 2]))/1000));
+				AddReward(-((Mathf.Abs(vectorAction[x * 3]) + Mathf.Abs(vectorAction[(x * 3) + 1]) + Mathf.Abs(vectorAction[(x * 3) + 2]))/100));
 				
 				
 				// }
@@ -192,7 +224,7 @@ public class HumanoidAgent : Agent {
 				// rb.AddTorque(rb.transform.up * academy.strength * vectorAction[(x * 3) + 1]);
 				// rb.AddTorque(rb.transform.forward * academy.strength * vectorAction[(x * 3) + 2]);
 				// reward -= (Mathf.Abs(act[x * 3] + act[(x * 3) + 1] +  act[(x * 3) + 2]))/1000;
-				AddReward(-(rb.angularVelocity.sqrMagnitude/1000));
+				// AddReward(-(rb.angularVelocity.sqrMagnitude/1000));
 			}
 			// if(rb.name != "head")
 			// {
