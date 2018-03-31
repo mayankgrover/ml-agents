@@ -7,6 +7,7 @@ public class CrawlerAcademy : Academy
     public override void InitializeAcademy()
     {
         Monitor.verticalOffset = 1f;
+        // Physics.gravity *= 2;
     }
 
     public override void AcademyReset()

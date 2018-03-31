@@ -36,22 +36,29 @@ public class CrawlerAgentConfigurable : Agent
         for (int i = 0; i < limbs.Length; i++)
         {
             limbRBs[i] = limbs[i].gameObject.GetComponent<Rigidbody>();
+            if(limbRBs[i])
+            {
+                limbRBs[i].maxAngularVelocity = 50;
+            }
         }
     }
 
     public override void CollectObservations()
     {
+        // AddVectorObs(body.transform.rotation);
         AddVectorObs(body.transform.rotation.eulerAngles);
 
         AddVectorObs(bodyRB.velocity);
+        AddVectorObs(bodyRB.position.y);
 
-        AddVectorObs((bodyRB.velocity - past_velocity) / Time.fixedDeltaTime);
-        past_velocity = bodyRB.velocity;
+        // AddVectorObs((bodyRB.velocity - past_velocity) / Time.fixedDeltaTime);
+        // past_velocity = bodyRB.velocity;
 
         for (int i = 0; i < limbs.Length; i++)
         {
             AddVectorObs(limbs[i].localPosition);
-            AddVectorObs(limbs[i].localRotation);
+            AddVectorObs(limbs[i].localRotation.eulerAngles);
+            // AddVectorObs(limbs[i].localRotation);
             AddVectorObs(limbRBs[i].velocity);
             AddVectorObs(limbRBs[i].angularVelocity);
         }
@@ -77,18 +84,39 @@ public class CrawlerAgentConfigurable : Agent
             vectorAction[k] = Mathf.Clamp(vectorAction[k], -1f, 1f);
         }
 
-        limbRBs[0].AddTorque(-limbs[0].transform.right * strength * vectorAction[0]);
-        limbRBs[1].AddTorque(-limbs[1].transform.right * strength * vectorAction[1]);
-        limbRBs[2].AddTorque(-limbs[2].transform.right * strength * vectorAction[2]);
-        limbRBs[3].AddTorque(-limbs[3].transform.right * strength * vectorAction[3]);
-        limbRBs[0].AddTorque(-body.transform.up * strength * vectorAction[4]);
-        limbRBs[1].AddTorque(-body.transform.up * strength * vectorAction[5]);
-        limbRBs[2].AddTorque(-body.transform.up * strength * vectorAction[6]);
-        limbRBs[3].AddTorque(-body.transform.up * strength * vectorAction[7]);
-        limbRBs[4].AddTorque(-limbs[4].transform.right * strength * vectorAction[8]);
-        limbRBs[5].AddTorque(-limbs[5].transform.right * strength * vectorAction[9]);
-        limbRBs[6].AddTorque(-limbs[6].transform.right * strength * vectorAction[10]);
-        limbRBs[7].AddTorque(-limbs[7].transform.right * strength * vectorAction[11]);
+        limbRBs[0].AddTorque(-limbs[0].transform.right * strength * vectorAction[0], ForceMode.VelocityChange);
+        limbRBs[1].AddTorque(-limbs[1].transform.right * strength * vectorAction[1], ForceMode.VelocityChange);
+        limbRBs[2].AddTorque(-limbs[2].transform.right * strength * vectorAction[2], ForceMode.VelocityChange);
+        limbRBs[3].AddTorque(-limbs[3].transform.right * strength * vectorAction[3], ForceMode.VelocityChange);
+        // limbRBs[0].AddTorque(-limbs[0].transform.forward * strength * vectorAction[4]);
+        // limbRBs[1].AddTorque(-limbs[1].transform.forward * strength * vectorAction[5]);
+        // limbRBs[2].AddTorque(-limbs[2].transform.forward * strength * vectorAction[6]);
+        // limbRBs[3].AddTorque(-limbs[3].transform.forward * strength * vectorAction[7]);
+        limbRBs[0].AddTorque(-body.transform.up * strength * vectorAction[4], ForceMode.VelocityChange);
+        limbRBs[1].AddTorque(-body.transform.up * strength * vectorAction[5], ForceMode.VelocityChange);
+        limbRBs[2].AddTorque(-body.transform.up * strength * vectorAction[6], ForceMode.VelocityChange);
+        limbRBs[3].AddTorque(-body.transform.up * strength * vectorAction[7], ForceMode.VelocityChange);
+        limbRBs[4].AddTorque(-limbs[4].transform.right * strength * vectorAction[8], ForceMode.VelocityChange);
+        limbRBs[5].AddTorque(-limbs[5].transform.right * strength * vectorAction[9], ForceMode.VelocityChange);
+        limbRBs[6].AddTorque(-limbs[6].transform.right * strength * vectorAction[10], ForceMode.VelocityChange);
+        limbRBs[7].AddTorque(-limbs[7].transform.right * strength * vectorAction[11], ForceMode.VelocityChange);
+        
+        // limbRBs[0].AddTorque(-limbs[0].transform.right * strength * vectorAction[0]);
+        // limbRBs[1].AddTorque(-limbs[1].transform.right * strength * vectorAction[1]);
+        // limbRBs[2].AddTorque(-limbs[2].transform.right * strength * vectorAction[2]);
+        // limbRBs[3].AddTorque(-limbs[3].transform.right * strength * vectorAction[3]);
+        // // limbRBs[0].AddTorque(-limbs[0].transform.forward * strength * vectorAction[4]);
+        // // limbRBs[1].AddTorque(-limbs[1].transform.forward * strength * vectorAction[5]);
+        // // limbRBs[2].AddTorque(-limbs[2].transform.forward * strength * vectorAction[6]);
+        // // limbRBs[3].AddTorque(-limbs[3].transform.forward * strength * vectorAction[7]);
+        // limbRBs[0].AddTorque(-body.transform.up * strength * vectorAction[4]);
+        // limbRBs[1].AddTorque(-body.transform.up * strength * vectorAction[5]);
+        // limbRBs[2].AddTorque(-body.transform.up * strength * vectorAction[6]);
+        // limbRBs[3].AddTorque(-body.transform.up * strength * vectorAction[7]);
+        // limbRBs[4].AddTorque(-limbs[4].transform.right * strength * vectorAction[8]);
+        // limbRBs[5].AddTorque(-limbs[5].transform.right * strength * vectorAction[9]);
+        // limbRBs[6].AddTorque(-limbs[6].transform.right * strength * vectorAction[10]);
+        // limbRBs[7].AddTorque(-limbs[7].transform.right * strength * vectorAction[11]);
 
         float torque_penalty = vectorAction[0] * vectorAction[0] + 
             vectorAction[1] * vectorAction[1] + 
@@ -107,7 +135,8 @@ public class CrawlerAgentConfigurable : Agent
         {
             SetReward(0 - 0.01f * torque_penalty + 1.0f * bodyRB.velocity.x
             - 0.05f * Mathf.Abs(body.transform.position.z - body.transform.parent.transform.position.z)
-                      - 0.05f * Mathf.Abs(bodyRB.velocity.y)
+            // - 0.05f * Mathf.Abs(bodyRB.velocity.y)
+            - 0.05f * Mathf.Abs(bodyRB.angularVelocity.sqrMagnitude)
             );
         }
         if (fell)
@@ -130,8 +159,11 @@ public class CrawlerAgentConfigurable : Agent
             }
             child.position = transformsPosition[child.gameObject];
             child.rotation = transformsRotation[child.gameObject];
-            child.gameObject.GetComponent<Rigidbody>().velocity = default(Vector3);
-            child.gameObject.GetComponent<Rigidbody>().angularVelocity = default(Vector3);
+            if(child.gameObject.GetComponent<Rigidbody>())
+            {
+                child.gameObject.GetComponent<Rigidbody>().velocity = default(Vector3);
+                child.gameObject.GetComponent<Rigidbody>().angularVelocity = default(Vector3);
+            }
         }
         gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Random.value * 90 - 45, 0));
     }

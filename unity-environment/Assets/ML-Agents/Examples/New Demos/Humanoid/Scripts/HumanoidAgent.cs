@@ -75,6 +75,11 @@ public class HumanoidAgent : Agent {
 		// print("Done. spawn a new player");
 		// academy.SpawnPlayer();
 		// academy.SpawnPlayerAndDestroyThisOne(spawnPoint, this);
+		// if(academy.resetPositionOnFail)
+		// {
+		// 	academy.SpawnPlayerAndDestroyThisOne(spawnPoint, this);
+
+		// }
     }
 
 
@@ -196,15 +201,51 @@ public class HumanoidAgent : Agent {
 		for(int x = 0; x < moveableBodyPartsCount - 1; x++)
 		{
 			var rb = moveableBodyParts[x];
+			var torqueRight = 		rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 3], -1, 1);
+			var torqueUp = 			rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1);
+			var torqueForward = 		rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 2], -1, 1);
+			// var torqueDirRight = 		rb.transform.right * 	Mathf.Clamp(vectorAction[x * 6], -1, 1);
+			// var torqueDirUp = 			rb.transform.up * 		Mathf.Clamp(vectorAction[(x * 6) + 1], -1, 1);
+			// var torqueDirForward = 		rb.transform.forward *	Mathf.Clamp(vectorAction[(x * 6) + 2], -1, 1);
+			// var torqueStrengthRight = 	academy.strength * 		Mathf.Clamp(vectorAction[(x * 6) + 3], 0, 1);
+			// var torqueStrengthUp = 		academy.strength *		Mathf.Clamp(vectorAction[(x * 6) + 4], 0, 1);
+			// var torqueStrengthForward = academy.strength * 		Mathf.Clamp(vectorAction[(x * 6) + 5], 0, 1);
 
-				// Vector3 torqueRight = Vector3.Lerp(startMarker.position, endMarker.position, fracJourney)
-				rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 3], -1, 1), ForceMode.Force);
-				rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.Force);
-				rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 2], -1, 1), ForceMode.Force);
+			// Vector3 torqueRight = Vector3.Lerp(startMarker.position, endMarker.position, fracJourney)
+			// Vector3 angVelocityRight = rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 3], -1, 1);
+			// Vector3 angVelocityUp = rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1);
+			// Vector3 angVelocityForward = rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 2], -1, 1);
+
+			// Quaternion deltaRotationRight = Quaternion.Euler(angVelocityRight * Time.deltaTime);
+			// Quaternion deltaRotationUp= Quaternion.Euler(angVelocityUp * Time.deltaTime);
+			// Quaternion deltaRotationForward = Quaternion.Euler(angVelocityForward * Time.deltaTime);
+			Quaternion deltaRotationRight = Quaternion.Euler(torqueRight * Time.deltaTime);
+			Quaternion deltaRotationUp= Quaternion.Euler(torqueUp * Time.deltaTime);
+			Quaternion deltaRotationForward = Quaternion.Euler(torqueForward * Time.deltaTime);
+			rb.MoveRotation(rb.rotation * deltaRotationRight);
+			rb.MoveRotation(rb.rotation * deltaRotationUp);
+			rb.MoveRotation(rb.rotation * deltaRotationForward);
+
+
+
+
+
+				// rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 3], -1, 1), ForceMode.Force);
+				// rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.Force);
+				// rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 2], -1, 1), ForceMode.Force);
 					// rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
 				// reward -= (Mathf.Abs(act[x * 3] + act[(x * 3) + 1] +  act[(x * 3) + 2]))/1000;
 				
-				AddReward(-((Mathf.Abs(vectorAction[x * 3]) + Mathf.Abs(vectorAction[(x * 3) + 1]) + Mathf.Abs(vectorAction[(x * 3) + 2]))/100));
+
+
+
+				// AddReward(-((Mathf.Abs(vectorAction[x * 3]) + Mathf.Abs(vectorAction[(x * 3) + 1]) + Mathf.Abs(vectorAction[(x * 3) + 2]))/100));
+				float torque_penalty = (Mathf.Abs(vectorAction[x * 3]) * Mathf.Abs(vectorAction[x * 3]))
+				+ (Mathf.Abs(vectorAction[(x * 3) + 1]) * Mathf.Abs(vectorAction[(x * 3) + 1]))
+				+ (Mathf.Abs(vectorAction[(x * 3) + 2]) * Mathf.Abs(vectorAction[(x * 3) + 2]));
+
+
+				AddReward(-(torque_penalty/100));
 				
 				
 				// }
@@ -225,25 +266,41 @@ public class HumanoidAgent : Agent {
 				// rb.AddTorque(rb.transform.forward * academy.strength * vectorAction[(x * 3) + 2]);
 				// reward -= (Mathf.Abs(act[x * 3] + act[(x * 3) + 1] +  act[(x * 3) + 2]))/1000;
 				// AddReward(-(rb.angularVelocity.sqrMagnitude/1000));
+
+
+				// if(rb.name == "hips" || rb.name == "spine" || rb.name == "chest")
+				// {
+				// 	// rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.Impulse);
+				// 	// rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.Impulse);
+				// 	rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.VelocityChange);
+				// 	rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.VelocityChange);
+				// 	// rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
+				// }
+				// else
+				// {
+				// 	rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.VelocityChange);
+				// 	// rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.VelocityChange);
+				// 	rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
+				// }
 			}
 			// if(rb.name != "head")
 			// {
 				
 			// 	// if(rb.name == "hips" || rb.name == "spine" || rb.name == "chest"|| rb.name == "neck" )
-			// 	if(rb.name == "hips" || rb.name == "spine" || rb.name == "chest")
-			// 	{
-			// 		// rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.Impulse);
-			// 		// rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.Impulse);
-			// 		rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.VelocityChange);
-			// 		rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.VelocityChange);
-			// 		// rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
-			// 	}
-			// 	else
-			// 	{
-			// 		rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.VelocityChange);
-			// 		// rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.VelocityChange);
-			// 		rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
-			// 	}
+				// if(rb.name == "hips" || rb.name == "spine" || rb.name == "chest")
+				// {
+				// 	// rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.Impulse);
+				// 	// rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.Impulse);
+				// 	rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.VelocityChange);
+				// 	rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.VelocityChange);
+				// 	// rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
+				// }
+				// else
+				// {
+				// 	rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1), ForceMode.VelocityChange);
+				// 	// rb.AddTorque(rb.transform.up * academy.strength * Mathf.Clamp(vectorAction[(x * 3) + 1], -1, 1), ForceMode.VelocityChange);
+				// 	rb.AddTorque(rb.transform.forward * academy.strength * Mathf.Clamp(vectorAction[(x * 2) + 2], -1, 1), ForceMode.VelocityChange);
+				// }
 
 			// 	// rb.AddTorque(rb.transform.right * academy.strength * vectorAction[x * 2], ForceMode.VelocityChange);
 			// 	// rb.AddTorque(rb.transform.right * academy.strength * Mathf.Clamp(vectorAction[x * 2], -1, 1));
@@ -358,7 +415,7 @@ public class HumanoidAgent : Agent {
 		if (fell)
 		{
 			// print("fell");
-			// AddReward(-1);
+			AddReward(-1);
 			// done = true;
 			// reward = -1;
 			fell = false;

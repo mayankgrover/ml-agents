@@ -7,7 +7,7 @@ public class CrawlerBodyContact : MonoBehaviour {
     CrawlerAgentConfigurable agent;
 
     void Start(){
-        agent = gameObject.transform.parent.gameObject.GetComponent<CrawlerAgentConfigurable>();
+        agent = gameObject.transform.root.gameObject.GetComponent<CrawlerAgentConfigurable>();
     }
 
     void OnTriggerEnter(Collider other){
