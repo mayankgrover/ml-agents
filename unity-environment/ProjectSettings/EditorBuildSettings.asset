@@ -44,6 +44,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/ML-Agents/Examples/New Demos/Humanoid/Scenes/Humanoid.unity
     guid: 4fc4e1df8405b4019af2bab7b58f0004
-  - enabled: 1
+  - enabled: 0
     path: Assets/ML-Agents/Examples/Crawler/Crawler Biped.unity
     guid: 4b88244b6a3054f75897360880b68962
+  - enabled: 1
+    path: Assets/ML-Agents/Examples/New Demos/Walker/Scenes/Crawler Biped 1.unity
+    guid: 94aa1b122aaca474ab92de91d9637f18
