@@ -148,7 +148,9 @@ public class WalkerAgent : Agent
         {
                 var rb = item.Value.rb;
                 // AddVectorObs(item.Key.localPosition);
-                AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+                // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+                AddVectorObs(hips.InverseTransformPoint(item.Value.rb.worldCenterOfMass));
+                // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
                                         // Gizmos.DrawSphere(item.Value.rb.worldCenterOfMass + (bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass), drawCOMRadius);
                 // AddVectorObs(item.Key.localRotation.eulerAngles);
                 AddVectorObs(Quaternion.FromToRotation(hips.transform.forward, item.Key.forward).eulerAngles); //can't parent to hips because it skews model so have to do this instead of local rotation
@@ -163,8 +165,8 @@ public class WalkerAgent : Agent
                 // print(GetJointRotation(joints[i]).eulerAngles);
 
 
-                //let ml handle body part mass
-                AddVectorObs(rb.mass);
+                // //let ml handle body part mass
+                // AddVectorObs(rb.mass);
 
             // }
         }
@@ -267,13 +269,13 @@ public class WalkerAgent : Agent
 
 
 
-        //let ml handle body part mass
-        int actIndex = 18;
-        foreach(var item in bodyParts)
-        {
-            item.Value.rb.mass = Mathf.Clamp(vectorAction[actIndex], 0.1f, 1f) * 20;
-            actIndex++;
-        }
+        // //let ml handle body part mass
+        // int actIndex = 18;
+        // foreach(var item in bodyParts)
+        // {
+        //     item.Value.rb.mass = Mathf.Clamp(vectorAction[actIndex], 0.1f, 1f) * 20;
+        //     actIndex++;
+        // }
 
 
 
