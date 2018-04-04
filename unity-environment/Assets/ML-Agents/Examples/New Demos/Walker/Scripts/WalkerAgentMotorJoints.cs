@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WalkerAgent : Agent
+public class WalkerAgentMotorJoints : Agent
 {
 
     public float strength;
@@ -15,7 +15,7 @@ public class WalkerAgent : Agent
     Transform body;
     Rigidbody bodyRB;
     public Transform[] limbs;
-    public ConfigurableJoint[] joints;
+    // public ConfigurableJoint[] joints;
     public Rigidbody[] limbRBs;
     Dictionary<GameObject, Vector3> transformsPosition;
     Dictionary<GameObject, Quaternion> transformsRotation;
@@ -38,8 +38,21 @@ public class WalkerAgent : Agent
     public Transform armR;
     public Transform forearmR;
     public Transform handR;
+    public Transform chestJoint;
+    public Transform spineJoint;
+    public Transform thighLJoint;
+    public Transform shinLJoint;
+    public Transform thighRJoint;
+    public Transform shinRJoint;
+    public Transform armLJoint;
+    public Transform forearmLJoint;
+    public Transform armRJoint;
+    public Transform forearmRJoint;
+
+
 
     public Dictionary<Transform, BodyPart> bodyParts = new Dictionary<Transform, BodyPart>();
+    public Dictionary<Transform, BodyPart> joints = new Dictionary<Transform, BodyPart>();
     public float agentEnergy = 100;
     public float energyRegenerationRate;
 
@@ -62,6 +75,15 @@ public class WalkerAgent : Agent
         bp.startingRot = t.rotation;
         bodyParts.Add(t, bp);
     }
+    public void SetupMotorJoint(Transform t)
+    {
+        BodyPart bp = new BodyPart();
+        bp.rb = t.GetComponent<Rigidbody>();
+        bp.joint = t.GetComponent<ConfigurableJoint>();
+        bp.startingPos = t.position;
+        bp.startingRot = t.rotation;
+        joints.Add(t, bp);
+    }
 
     public override void InitializeAgent()
     {
@@ -82,16 +104,27 @@ public class WalkerAgent : Agent
         SetupBodyPart(forearmR);
         SetupBodyPart(handR);
 
+        SetupMotorJoint(chestJoint);
+        SetupMotorJoint(spineJoint);
+        SetupMotorJoint(thighLJoint);
+        SetupMotorJoint(shinLJoint);
+        SetupMotorJoint(thighRJoint);
+        SetupMotorJoint(shinRJoint);
+        SetupMotorJoint(armLJoint);
+        SetupMotorJoint(forearmLJoint);
+        SetupMotorJoint(armRJoint);
+        SetupMotorJoint(forearmRJoint);
+
         // body = transform.Find("Body");
         // bodyRB = body.GetComponent<Rigidbody>();
-        // transformsPosition = new Dictionary<GameObject, Vector3>();
-        // transformsRotation = new Dictionary<GameObject, Quaternion>();
-        // Transform[] allChildren = GetComponentsInChildren<Transform>();
-        // foreach (Transform child in allChildren)
-        // {
-        //     transformsPosition[child.gameObject] = child.position;
-        //     transformsRotation[child.gameObject] = child.rotation;
-        // }
+        transformsPosition = new Dictionary<GameObject, Vector3>();
+        transformsRotation = new Dictionary<GameObject, Quaternion>();
+        Transform[] allChildren = GetComponentsInChildren<Transform>();
+        foreach (Transform child in allChildren)
+        {
+            transformsPosition[child.gameObject] = child.position;
+            transformsRotation[child.gameObject] = child.rotation;
+        }
         leg_touching = new bool[2];
         limbRBs = new Rigidbody[limbs.Length];
         totalCharMass = 0; //reset to 0
@@ -114,10 +147,24 @@ public class WalkerAgent : Agent
                   item.Value.rb.maxAngularVelocity = 500;
                 // if(joints[i])
                 // limbRBs[i].centerOfMass += joints[i].anchor;
-                if(item.Value.joint)
-                {
-                    item.Value.rb.centerOfMass += Vector3.Scale(item.Value.joint.anchor, item.Value.rb.transform.localScale);
-                }
+                // if(item.Value.joint)
+                // {
+                //     item.Value.rb.centerOfMass += Vector3.Scale(item.Value.joint.anchor, item.Value.rb.transform.localScale);
+                // }
+                totalCharMass += item.Value.rb.mass;
+            }
+        }
+        foreach(var item in joints)
+        {
+            if(item.Value.rb)
+            {
+                  item.Value.rb.maxAngularVelocity = 500;
+                // if(joints[i])
+                // limbRBs[i].centerOfMass += joints[i].anchor;
+                // if(item.Value.joint)
+                // {
+                //     item.Value.rb.centerOfMass += Vector3.Scale(item.Value.joint.anchor, item.Value.rb.transform.localScale);
+                // }
                 totalCharMass += item.Value.rb.mass;
             }
         }
@@ -140,42 +187,133 @@ public class WalkerAgent : Agent
         return(Quaternion.FromToRotation(joint.axis, joint.connectedBody.transform.rotation.eulerAngles));
     }
 
+    public void BodyPartObservation(BodyPart bp)
+    {
+        var rb = bp.rb;
+        AddVectorObs(rb.transform.localPosition);
+        AddVectorObs(rb.position.y);
+        // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+        // AddVectorObs(hips.InverseTransformPoint(item.Value.rb.worldCenterOfMass));
+        // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+                                // Gizmos.DrawSphere(item.Value.rb.worldCenterOfMass + (bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass), drawCOMRadius);
+        // AddVectorObs(item.Key.localRotation.eulerAngles);
+
+        AddVectorObs(rb.velocity);
+        AddVectorObs(rb.angularVelocity);
+
+        if(bp.joint)
+        {
+            // if(item.Key != hips)
+            // {
+                // AddVectorObs(Quaternion.FromToRotation(hips.transform.forward, item.Key.forward).eulerAngles); //can't parent to hips because it skews model so have to do this instead of local rotation
+                var jointRotation = GetJointRotation(bp.joint);
+                AddVectorObs(jointRotation.eulerAngles); //get the joint rotation
+                // print(item.Key.name + " joint rotation: " + jointRotation);
+            // }
+
+        }
+    }
+
     public override void CollectObservations()
     {
 
         AddVectorObs(bodyParts[hips].rb.rotation.eulerAngles);
         // AddVectorObs(bodyParts[hips].rb.velocity);
-        AddVectorObs(bodyParts[head].rb.position.y); //head height
+        // AddVectorObs(bodyParts[head].rb.position.y); //head height
 
-        foreach(var item in bodyParts)
-        {
-                var rb = item.Value.rb;
-                AddVectorObs(item.Key.localPosition);
-                AddVectorObs(item.Value.rb.position.y);
-                // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
-                // AddVectorObs(hips.InverseTransformPoint(item.Value.rb.worldCenterOfMass));
-                // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
-                                        // Gizmos.DrawSphere(item.Value.rb.worldCenterOfMass + (bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass), drawCOMRadius);
-                // AddVectorObs(item.Key.localRotation.eulerAngles);
+        BodyPartObservation(joints[chestJoint]);
+        BodyPartObservation(joints[spineJoint]);
 
-                AddVectorObs(rb.velocity);
-                AddVectorObs(rb.angularVelocity);
+        BodyPartObservation(joints[thighLJoint]);
+        BodyPartObservation(joints[shinLJoint]);
+        BodyPartObservation(joints[thighRJoint]);
+        BodyPartObservation(joints[shinRJoint]);
+
+        BodyPartObservation(joints[armLJoint]);
+        BodyPartObservation(joints[forearmLJoint]);
+        BodyPartObservation(joints[armRJoint]);
+        BodyPartObservation(joints[forearmRJoint]);
+
+        // BodyPartObservation(bodyParts[chest]);
+        // BodyPartObservation(bodyParts[spine]);
+
+        // BodyPartObservation(bodyParts[thighL]);
+        // BodyPartObservation(bodyParts[shinL]);
+        // BodyPartObservation(bodyParts[thighR]);
+        // BodyPartObservation(bodyParts[shinR]);
+
+        // BodyPartObservation(bodyParts[armL]);
+        // BodyPartObservation(bodyParts[forearmL]);
+        // BodyPartObservation(bodyParts[armR]);
+        // BodyPartObservation(bodyParts[forearmR]);
 
 
-            if(item.Key != hips)
-            {
-                // AddVectorObs(Quaternion.FromToRotation(hips.transform.forward, item.Key.forward).eulerAngles); //can't parent to hips because it skews model so have to do this instead of local rotation
-                var jointRotation = GetJointRotation(item.Value.joint);
-                AddVectorObs(jointRotation.eulerAngles); //get the joint rotation
-                // print(item.Key.name + " joint rotation: " + jointRotation);
-            }
+        BodyPartObservation(bodyParts[hips]);
+        BodyPartObservation(bodyParts[handL]);
+        BodyPartObservation(bodyParts[handR]);
+        BodyPartObservation(bodyParts[footR]);
+        BodyPartObservation(bodyParts[footL]);
+        BodyPartObservation(bodyParts[head]);
+
+        // foreach(var item in bodyParts)
+        // {
+        //         var rb = item.Value.rb;
+        //         AddVectorObs(item.Key.localPosition);
+        //         AddVectorObs(item.Value.rb.position.y);
+        //         // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+        //         // AddVectorObs(hips.InverseTransformPoint(item.Value.rb.worldCenterOfMass));
+        //         // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+        //                                 // Gizmos.DrawSphere(item.Value.rb.worldCenterOfMass + (bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass), drawCOMRadius);
+        //         // AddVectorObs(item.Key.localRotation.eulerAngles);
+
+        //         AddVectorObs(rb.velocity);
+        //         AddVectorObs(rb.angularVelocity);
 
 
-                // //let ml handle body part mass
-                // AddVectorObs(rb.mass);
+        //     if(item.Key != hips)
+        //     {
+        //         // AddVectorObs(Quaternion.FromToRotation(hips.transform.forward, item.Key.forward).eulerAngles); //can't parent to hips because it skews model so have to do this instead of local rotation
+        //         var jointRotation = GetJointRotation(item.Value.joint);
+        //         AddVectorObs(jointRotation.eulerAngles); //get the joint rotation
+        //         // print(item.Key.name + " joint rotation: " + jointRotation);
+        //     }
 
-            // }
-        }
+
+        //         // //let ml handle body part mass
+        //         // AddVectorObs(rb.mass);
+
+        //     // }
+        // }
+
+        // foreach(var item in joints)
+        // {
+        //         var rb = item.Value.rb;
+        //         AddVectorObs(item.Key.localPosition);
+        //         AddVectorObs(item.Value.rb.position.y);
+        //         // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+        //         // AddVectorObs(hips.InverseTransformPoint(item.Value.rb.worldCenterOfMass));
+        //         // AddVectorObs(bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass);
+        //                                 // Gizmos.DrawSphere(item.Value.rb.worldCenterOfMass + (bodyParts[hips].rb.worldCenterOfMass - item.Value.rb.worldCenterOfMass), drawCOMRadius);
+        //         // AddVectorObs(item.Key.localRotation.eulerAngles);
+
+        //         AddVectorObs(rb.velocity);
+        //         AddVectorObs(rb.angularVelocity);
+
+
+        //     if(item.Key != hips)
+        //     {
+        //         // AddVectorObs(Quaternion.FromToRotation(hips.transform.forward, item.Key.forward).eulerAngles); //can't parent to hips because it skews model so have to do this instead of local rotation
+        //         var jointRotation = GetJointRotation(item.Value.joint);
+        //         AddVectorObs(jointRotation.eulerAngles); //get the joint rotation
+        //         // print(item.Key.name + " joint rotation: " + jointRotation);
+        //     }
+
+
+        //         // //let ml handle body part mass
+        //         // AddVectorObs(rb.mass);
+
+        //     // }
+        // }
 
         for (int index = 0; index < 2; index++)
         {
@@ -247,24 +385,53 @@ public class WalkerAgent : Agent
         ForceMode forceModeToUse = ForceMode.Acceleration;
         // ForceMode forceModeToUse = ForceMode.Force;
 
-        bodyParts[thighL].rb.AddTorque(thighL.right * strength * vectorAction[0], forceModeToUse);
-        bodyParts[thighR].rb.AddTorque(thighR.right * strength * vectorAction[1], forceModeToUse);
-        bodyParts[thighL].rb.AddTorque(thighL.forward * strength * vectorAction[2], forceModeToUse);
-        bodyParts[thighR].rb.AddTorque(thighR.forward * strength * vectorAction[3], forceModeToUse);
-        bodyParts[shinL].rb.AddTorque(shinL.right * strength * vectorAction[4], forceModeToUse);
-        bodyParts[shinR].rb.AddTorque(shinR.right * strength * vectorAction[5], forceModeToUse);
+        joints[thighLJoint].rb.AddTorque(thighLJoint.right * strength * vectorAction[0], forceModeToUse);
+        joints[thighRJoint].rb.AddTorque(thighRJoint.right * strength * vectorAction[1], forceModeToUse);
+        joints[thighLJoint].rb.AddTorque(thighLJoint.forward * strength * vectorAction[2], forceModeToUse);
+        joints[thighRJoint].rb.AddTorque(thighRJoint.forward * strength * vectorAction[3], forceModeToUse);
+        joints[shinLJoint].rb.AddTorque(shinLJoint.right * strength * vectorAction[4], forceModeToUse);
+        joints[shinRJoint].rb.AddTorque(shinRJoint.right * strength * vectorAction[5], forceModeToUse);
         // bodyParts[spine].rb.AddTorque(spine.up * strength * vectorAction[6], forceModeToUse);
         // bodyParts[spine].rb.AddTorque(spine.forward * strength * vectorAction[7], forceModeToUse);
-        bodyParts[chest].rb.AddTorque(chest.up * strength * vectorAction[6], forceModeToUse);
-        bodyParts[chest].rb.AddTorque(chest.forward * strength * vectorAction[7], forceModeToUse);
+        // bodyParts[chest].rb.AddTorque(chest.up * strength * vectorAction[6], forceModeToUse);
+        joints[chestJoint].rb.AddTorque(chestJoint.right * strength * vectorAction[6], forceModeToUse);
+        joints[chestJoint].rb.AddTorque(chestJoint.forward * strength * vectorAction[7], forceModeToUse);
         // bodyParts[head].rb.AddTorque(head.up * strength * vectorAction[10], forceModeToUse);
         // bodyParts[head].rb.AddTorque(head.forward * strength * vectorAction[11], forceModeToUse);
-        bodyParts[armL].rb.AddTorque(armL.forward * strength * vectorAction[8], forceModeToUse);
-        bodyParts[armL].rb.AddTorque(armL.right * strength * vectorAction[9], forceModeToUse);
-        bodyParts[armR].rb.AddTorque(armR.forward * strength * vectorAction[10], forceModeToUse);
-        bodyParts[armR].rb.AddTorque(armR.right * strength * vectorAction[11], forceModeToUse);
-        bodyParts[forearmR].rb.AddTorque(forearmR.right * strength * vectorAction[12], forceModeToUse);
-        bodyParts[forearmL].rb.AddTorque(forearmL.right * strength * vectorAction[13], forceModeToUse);
+        joints[armLJoint].rb.AddTorque(armLJoint.forward * strength * vectorAction[8], forceModeToUse);
+        joints[armLJoint].rb.AddTorque(armLJoint.right * strength * vectorAction[9], forceModeToUse);
+        joints[armRJoint].rb.AddTorque(armRJoint.forward * strength * vectorAction[10], forceModeToUse);
+        joints[armRJoint].rb.AddTorque(armRJoint.right * strength * vectorAction[11], forceModeToUse);
+        joints[forearmRJoint].rb.AddTorque(forearmRJoint.right * strength * vectorAction[12], forceModeToUse);
+        joints[forearmLJoint].rb.AddTorque(forearmLJoint.right * strength * vectorAction[13], forceModeToUse);
+
+
+
+
+        // bodyParts[thighL].rb.AddTorque(thighL.right * strength * vectorAction[0], forceModeToUse);
+        // bodyParts[thighR].rb.AddTorque(thighR.right * strength * vectorAction[1], forceModeToUse);
+        // bodyParts[thighL].rb.AddTorque(thighL.forward * strength * vectorAction[2], forceModeToUse);
+        // bodyParts[thighR].rb.AddTorque(thighR.forward * strength * vectorAction[3], forceModeToUse);
+        // bodyParts[shinL].rb.AddTorque(shinL.right * strength * vectorAction[4], forceModeToUse);
+        // bodyParts[shinR].rb.AddTorque(shinR.right * strength * vectorAction[5], forceModeToUse);
+        // // bodyParts[spine].rb.AddTorque(spine.up * strength * vectorAction[6], forceModeToUse);
+        // // bodyParts[spine].rb.AddTorque(spine.forward * strength * vectorAction[7], forceModeToUse);
+        // // bodyParts[chest].rb.AddTorque(chest.up * strength * vectorAction[6], forceModeToUse);
+        // bodyParts[chest].rb.AddTorque(chest.right * strength * vectorAction[6], forceModeToUse);
+        // bodyParts[chest].rb.AddTorque(chest.forward * strength * vectorAction[7], forceModeToUse);
+        // // bodyParts[head].rb.AddTorque(head.up * strength * vectorAction[10], forceModeToUse);
+        // // bodyParts[head].rb.AddTorque(head.forward * strength * vectorAction[11], forceModeToUse);
+        // bodyParts[armL].rb.AddTorque(armL.forward * strength * vectorAction[8], forceModeToUse);
+        // bodyParts[armL].rb.AddTorque(armL.right * strength * vectorAction[9], forceModeToUse);
+        // bodyParts[armR].rb.AddTorque(armR.forward * strength * vectorAction[10], forceModeToUse);
+        // bodyParts[armR].rb.AddTorque(armR.right * strength * vectorAction[11], forceModeToUse);
+        // bodyParts[forearmR].rb.AddTorque(forearmR.right * strength * vectorAction[12], forceModeToUse);
+        // bodyParts[forearmL].rb.AddTorque(forearmL.right * strength * vectorAction[13], forceModeToUse);
+
+
+
+
+
 
         // bodyParts[thighL].rb.AddTorque(thighL.right * strength * vectorAction[0], forceModeToUse);
         // bodyParts[thighR].rb.AddTorque(thighR.right * strength * vectorAction[1], forceModeToUse);
@@ -562,38 +729,44 @@ public class WalkerAgent : Agent
     public override void AgentReset()
     {
         fell = false;
-        foreach(var item in bodyParts)
-        {
-            item.Key.position = item.Value.startingPos;
-            item.Key.rotation = item.Value.startingRot;
-            item.Value.rb.velocity = Vector3.zero;
-            item.Value.rb.angularVelocity = Vector3.zero;
-        }
-        gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Random.Range(0, 360), 0));
-
-
+        // foreach(var item in bodyParts)
+        // {
+        //     item.Key.position = item.Value.startingPos;
+        //     item.Key.rotation = item.Value.startingRot;
+        //     item.Value.rb.velocity = Vector3.zero;
+        //     item.Value.rb.angularVelocity = Vector3.zero;
+        // }
+        // gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Random.Range(0, 360), 0));
 
 
 
         // Transform[] allChildren = GetComponentsInChildren<Transform>();
         // foreach (Transform child in allChildren)
         // {
-        //     if ((child.gameObject.name.Contains("Crawler"))
-        //         || (child.gameObject.name.Contains("parent")))
-        //     {
-        //         continue;
-        //     }
-        //     child.position = transformsPosition[child.gameObject];
-        //     child.rotation = transformsRotation[child.gameObject];
-        //     if(child.gameObject.GetComponent<Rigidbody>())
-        //     {
-        //         child.gameObject.GetComponent<Rigidbody>().velocity = default(Vector3);
-        //         child.gameObject.GetComponent<Rigidbody>().angularVelocity = default(Vector3);
-        //     }
+            
         // }
-        // // gameObject.transform.rotation *= Quaternion.Euler(new Vector3(0, 90, 0));
-        // gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Random.Range(0, 360), 0));
-        // // gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Random.value * 90 - 45, 0));
+
+
+        Transform[] allChildren = GetComponentsInChildren<Transform>();
+        // Transform[] allChildren = GetComponentsInChildren<Transform>();
+        foreach (Transform child in allChildren)
+        {
+            if ((child.gameObject.name.Contains("Crawler"))
+                || (child.gameObject.name.Contains("parent")))
+            {
+                continue;
+            }
+            child.position = transformsPosition[child.gameObject];
+            child.rotation = transformsRotation[child.gameObject];
+            if(child.gameObject.GetComponent<Rigidbody>())
+            {
+                child.gameObject.GetComponent<Rigidbody>().velocity = default(Vector3);
+                child.gameObject.GetComponent<Rigidbody>().angularVelocity = default(Vector3);
+            }
+        }
+        // gameObject.transform.rotation *= Quaternion.Euler(new Vector3(0, 90, 0));
+        gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Random.Range(0, 360), 0));
+        // gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, Random.value * 90 - 45, 0));
     }
 
     public override void AgentOnDone()

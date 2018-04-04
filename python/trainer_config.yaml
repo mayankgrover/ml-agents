@@ -110,10 +110,10 @@ CrawlerBrain:
 WalkerBrain:
     normalize: true
     num_epoch: 3
-    time_horizon: 64
+    time_horizon: 1024
     beta: 1.0e-2
     # time_horizon: 64
-    batch_size: 2024
+    batch_size: 2048
     buffer_size: 10240
     gamma: 0.995
     max_steps: 1e6

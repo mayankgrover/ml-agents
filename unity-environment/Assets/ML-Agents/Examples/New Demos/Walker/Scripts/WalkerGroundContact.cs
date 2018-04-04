@@ -5,10 +5,11 @@ using UnityEngine;
 public class WalkerGroundContact : MonoBehaviour {
 
     public int index;
-    WalkerAgent agent;
+    // WalkerAgent agent;
+    WalkerAgentMotorJoints agent;
 
     void Start(){
-        agent = transform.root.GetComponent<WalkerAgent>();
+        agent = transform.root.GetComponent<WalkerAgentMotorJoints>();
     }
 
     void OnCollisionStay(Collision other){

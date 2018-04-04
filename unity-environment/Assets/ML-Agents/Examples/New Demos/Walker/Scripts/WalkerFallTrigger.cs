@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class WalkerFallTrigger : MonoBehaviour {
 
-    WalkerAgent agent;
+    // WalkerAgent agent;
+    WalkerAgentMotorJoints agent;
 
     void Start(){
-        agent = transform.root.gameObject.GetComponent<WalkerAgent>();
+        agent = transform.root.gameObject.GetComponent<WalkerAgentMotorJoints>();
     }
 
     void OnTriggerEnter(Collider other){
