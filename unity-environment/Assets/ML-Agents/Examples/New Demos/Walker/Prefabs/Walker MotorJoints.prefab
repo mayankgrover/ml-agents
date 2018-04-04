@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 23684760315047972}
   - component: {fileID: 54458318171617488}
   - component: {fileID: 138650922091809782}
+  - component: {fileID: 114028367374984026}
   m_Layer: 0
   m_Name: shinR
   m_TagString: Untagged
@@ -138,6 +139,7 @@ GameObject:
   - component: {fileID: 23065664069313286}
   - component: {fileID: 54649336245346446}
   - component: {fileID: 153795292092435218}
+  - component: {fileID: 114020632468971830}
   m_Layer: 0
   m_Name: head
   m_TagString: Untagged
@@ -371,6 +373,7 @@ GameObject:
   - component: {fileID: 23569742769468826}
   - component: {fileID: 54849584195422022}
   - component: {fileID: 138665879192986732}
+  - component: {fileID: 114112723356769424}
   m_Layer: 0
   m_Name: shinL
   m_TagString: Untagged
@@ -2968,6 +2971,39 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &114020632468971830
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1217392108092212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9de9949c74d1249fcaf94f8518a316a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114028367374984026
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1156467984638138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9de9949c74d1249fcaf94f8518a316a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114112723356769424
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1635463554263640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9de9949c74d1249fcaf94f8518a316a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114443739176927176
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3009,7 +3045,7 @@ MonoBehaviour:
     resetOnDone: 1
     onDemandDecision: 0
     numberOfActionsBetweenDecisions: 5
-  strength: 1000
+  strength: 1500
   leg_touching: 
   fell: 0
   limbs: []

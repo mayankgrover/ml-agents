@@ -506,6 +506,7 @@ public class WalkerAgentMotorJoints : Agent
             - 0.05f * Mathf.Abs(hips.transform.position.z - hips.transform.parent.transform.position.z)
             // - 0.05f * Mathf.Abs(bodyRB.velocity.y)
             - 0.05f * Mathf.Abs(bodyParts[hips].rb.angularVelocity.sqrMagnitude)
+            - 0.05f * Mathf.Abs(bodyParts[head].rb.angularVelocity.sqrMagnitude)
             );
             
         }
