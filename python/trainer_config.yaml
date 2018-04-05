@@ -117,7 +117,7 @@ WalkerBrain:
     buffer_size: 10240
     gamma: 0.995
     max_steps: 1e6
-    summary_freq: 3000
+    summary_freq: 500
 
 ReacherBrain:
     normalize: true
