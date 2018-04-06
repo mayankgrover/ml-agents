@@ -68,7 +68,7 @@ public class LudoGame : MonoBehaviour
         }
 
         // didn't finish the game -0.01
-        //agent.AddReward(-0.01f);
+        agent.AddReward(-0.01f);
 
         // Killed another player's piece
         // provided both of the pieces of other agent were not on the same position
