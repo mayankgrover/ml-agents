@@ -18,7 +18,7 @@ public class LudoPiece: MonoBehaviour
         localPositionOffset = transform.localPosition;
     }
 
-    public void MoveTo(int boardPosition)
+    public void MoveTo(int boardPosition, float duration = 0f)
     {
         //if (this.boardPosition != boardPosition)
         {
@@ -26,7 +26,8 @@ public class LudoPiece: MonoBehaviour
             gridPosition = game.BoardToGridPosition(boardPosition);
             Vector2 position = game.GridToLocalPosition(gridPosition);
             position += localPositionOffset;
-            transform.localPosition = position;
+            //transform.localPosition = position;
+            iTween.MoveTo(gameObject, position, duration);
         }
     }
 
@@ -63,7 +64,7 @@ public class LudoPiece: MonoBehaviour
         //float step = duration/roll;
         int endPos = startPos + roll;
         while(boardPosition < endPos) {
-            MoveTo(boardPosition + 1);
+            MoveTo(boardPosition + 1, duration);
             yield return new WaitForSeconds(duration);
         }
     }

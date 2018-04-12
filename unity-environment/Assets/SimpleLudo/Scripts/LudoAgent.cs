@@ -17,11 +17,11 @@ public class LudoAgent : Agent {
         ResetPieces();
     }
 
-    public void MovePiece(int pieceIndex, int position)
-    {
-        LudoPiece piece = pieceIndex == 1 ? piece1 : piece2;
-        piece.MoveTo(position);
-    }
+    //public void MovePiece(int pieceIndex, int position)
+    //{
+    //    LudoPiece piece = pieceIndex == 1 ? piece1 : piece2;
+    //    piece.MoveTo(position);
+    //}
 
     public override void CollectObservations()
     {
@@ -69,7 +69,7 @@ public class LudoAgent : Agent {
                     game.UpdateDice(lastDiceRoll);
                     AddReward(0.01f);
                     piece.MoveForward(lastDiceRoll);
-                    yield return new WaitForSeconds(lastDiceRoll * 0.5f + 1f);
+                    yield return new WaitForSeconds(lastDiceRoll * 0.5f + 0.1f);
                     if (piece.IsSafe()) {
                         AddReward(0.01f);
                     }
@@ -110,7 +110,7 @@ public class LudoAgent : Agent {
             else
             { //if (brain.brainType == BrainType.Internal)
               //StartCoroutine(RequestNextDecisionIn(1f));
-                StartCoroutine(RequestNextDecisionIn(1f));
+                StartCoroutine(RequestNextDecisionIn(0.5f));
             }
         }
         yield return null;
@@ -130,7 +130,7 @@ public class LudoAgent : Agent {
 
     private void ResetPieces()
     {
-        piece1.MoveTo(0);
-        piece2.MoveTo(0);
+        piece1.MoveTo(0, 0.5f);
+        piece2.MoveTo(0, 0.5f);
     }
 }

@@ -85,7 +85,7 @@ public class LudoGame : MonoBehaviour
             agent.AddReward(0.25f);
             LudoUI.Instance.IncrementKill(agent.index);
 
-            otherPiece.MoveTo(0);
+            otherPiece.MoveTo(0, 0.5f);
             otherAgent.AddReward(-0.25f);
         }
 
