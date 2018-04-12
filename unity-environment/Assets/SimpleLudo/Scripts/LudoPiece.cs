@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class LudoPiece: MonoBehaviour
 {
@@ -53,6 +54,17 @@ public class LudoPiece: MonoBehaviour
 
     public void MoveForward(int roll)
     {
-        MoveTo(boardPosition + roll);
+        StartCoroutine(MoveAimation(boardPosition, roll, 0.5f));
+        //MoveTo(boardPosition + roll);
+    }
+
+    private IEnumerator MoveAimation(int startPos, int roll, float duration)
+    {
+        //float step = duration/roll;
+        int endPos = startPos + roll;
+        while(boardPosition < endPos) {
+            MoveTo(boardPosition + 1);
+            yield return new WaitForSeconds(duration);
+        }
     }
 }

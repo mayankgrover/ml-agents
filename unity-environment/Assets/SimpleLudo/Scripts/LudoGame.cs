@@ -65,10 +65,6 @@ public class LudoGame : MonoBehaviour
             academy.AcademyReset();
             return true;
         }
-        // Add reward if this latest move took a piece to finished state
-        //else if (piece.IsFinished) {
-        //    agent.AddReward(0.5f);
-        //}
 
         // didn't finish the game
         agent.AddReward(-0.005f);

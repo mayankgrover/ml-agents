@@ -36,10 +36,14 @@ public class LudoAgent : Agent {
         //AddVectorObs(piece2.CanMove(lastDiceRoll) ? 1 : 0);
         AddVectorObs(game.GetOtherAgent(this).piece1.CurrentPosition);
         AddVectorObs(game.GetOtherAgent(this).piece2.CurrentPosition);
-        //Debug.LogFormat("[Obs][A]{0} [D]:{1}", gameObject.name, lastDiceRoll);
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
+    {
+        StartCoroutine(UpdateAgent(vectorAction, textAction));
+    }
+
+    private IEnumerator UpdateAgent(float[] vectorAction, string textAction)
     {
         bool gameFinished = false;
         if(lastDiceRoll != 0 && brain.brainParameters.vectorActionSpaceType == SpaceType.discrete)
@@ -61,8 +65,11 @@ public class LudoAgent : Agent {
 
             if (piece != null) {
                 if (piece.CanMove(lastDiceRoll)) {
+                    game.UpdateAgent(this, piece);
+                    game.UpdateDice(lastDiceRoll);
                     AddReward(0.01f);
                     piece.MoveForward(lastDiceRoll);
+                    yield return new WaitForSeconds(lastDiceRoll * 0.5f + 1f);
                     if (piece.IsSafe()) {
                         AddReward(0.01f);
                     }
@@ -72,8 +79,6 @@ public class LudoAgent : Agent {
                     //    piece.name, piece.CurrentPosition,
                     //    otherPiece.name, otherPiece.CurrentPosition);
                     // UI
-                    game.UpdateAgent(this, piece);
-                    game.UpdateDice(lastDiceRoll);
                 }
                 else {
                     if (otherPiece.CanMove(lastDiceRoll))
@@ -102,10 +107,13 @@ public class LudoAgent : Agent {
             if (brain.brainType == BrainType.External) {
                 game.RequestNextDecision(this);
             }
-            else { //if (brain.brainType == BrainType.Internal)
+            else
+            { //if (brain.brainType == BrainType.Internal)
+              //StartCoroutine(RequestNextDecisionIn(1f));
                 StartCoroutine(RequestNextDecisionIn(1f));
             }
         }
+        yield return null;
     }
 
     private IEnumerator RequestNextDecisionIn(float delay)
