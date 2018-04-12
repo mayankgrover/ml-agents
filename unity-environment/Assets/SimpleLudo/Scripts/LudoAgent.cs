@@ -26,14 +26,14 @@ public class LudoAgent : Agent {
     public override void CollectObservations()
     {
         lastDiceRoll = game.GetDiceRoll();
-        AddVectorObs(game.gridSizeX);
-        AddVectorObs(game.gridSizeY);
+        //AddVectorObs(game.gridSizeX);
+        //AddVectorObs(game.gridSizeY);
         AddVectorObs(game.gridSize);
         AddVectorObs(lastDiceRoll);
         AddVectorObs(piece1.CurrentPosition);
-        AddVectorObs(piece1.CanMove(lastDiceRoll) ? 1 : 0);
+        //AddVectorObs(piece1.CanMove(lastDiceRoll) ? 1 : 0);
         AddVectorObs(piece2.CurrentPosition);
-        AddVectorObs(piece2.CanMove(lastDiceRoll) ? 1 : 0);
+        //AddVectorObs(piece2.CanMove(lastDiceRoll) ? 1 : 0);
         AddVectorObs(game.GetOtherAgent(this).piece1.CurrentPosition);
         AddVectorObs(game.GetOtherAgent(this).piece2.CurrentPosition);
         //Debug.LogFormat("[Obs][A]{0} [D]:{1}", gameObject.name, lastDiceRoll);
@@ -48,35 +48,20 @@ public class LudoAgent : Agent {
             LudoPiece piece = null;
             LudoPiece otherPiece = null;
 
-            // no action
-            if (action == 0) {
-                if(piece1.CanMove(lastDiceRoll) || piece2.CanMove(lastDiceRoll)) {
-                    Debug.LogWarningFormat("[NoMove:A]:{0} [D]:{1} [P]:{2}:{3} [OP]:{4}:{5}",
-                        gameObject.name, lastDiceRoll,
-                        piece1.name, piece1.CurrentPosition,
-                        piece2.name, piece2.CurrentPosition);
-                    AddReward(-0.25f);
-                } else {
-                    Debug.LogFormat("[NoMove:A]:{0} [D]:{1} [P]:{2}:{3} [OP]:{4}:{5}",
-                        gameObject.name, lastDiceRoll,
-                        piece1.name, piece1.CurrentPosition,
-                        piece2.name, piece2.CurrentPosition);
-                    AddReward(0.1f);
-                }
-            }
             // move piece 1
-            else if (action == 1) {
+            if (action == 0) {
                 piece = piece1;
                 otherPiece = piece2;
             }
             // move piece 2
-            else if(action == 2) {
+            else if(action == 1) {
                 piece = piece2;
                 otherPiece = piece1;
             }
 
             if (piece != null) {
                 if (piece.CanMove(lastDiceRoll)) {
+                    AddReward(0.01f);
                     piece.MoveForward(lastDiceRoll);
                     gameFinished = game.UpdateGameState(this, piece);
                     Debug.LogFormat("[A]:{0} [D]:{1} [P]:{2}:{3} [OP]:{4}:{5}",
@@ -88,18 +73,9 @@ public class LudoAgent : Agent {
                     game.UpdateDice(lastDiceRoll);
                 }
                 else {
-                    if(!otherPiece.CanMove(lastDiceRoll))
+                    if (otherPiece.CanMove(lastDiceRoll))
                     {
-                        // neither piece can move
-                        AddReward(-0.1f);
-                        Debug.LogWarningFormat("[NA:NN]:{0} [D]:{1} [P]:{4}:{5} [OP]:{2}:{3}",
-                            gameObject.name, lastDiceRoll,
-                            piece.name, piece.CurrentPosition,
-                            otherPiece.name, otherPiece.CurrentPosition);
-                    }
-                    else //if (otherPiece.CanMove(lastDiceRoll))
-                    {
-                        AddReward(-0.1f);
+                        //AddReward(-0.01f);
                         Debug.LogWarningFormat("[NA:NP]:{0} [D]:{1} [P]:{4}:{5} [OP]:{2}:{3}",
                             gameObject.name, lastDiceRoll,
                             piece.name, piece.CurrentPosition,
@@ -108,7 +84,7 @@ public class LudoAgent : Agent {
 
                     if (piece.IsFinished)
                     {
-                        AddReward(-0.1f);
+                        //AddReward(-0.1f);
                         Debug.LogWarningFormat("[NA:F]:{0} [D]:{1} [P]:{2}:{3} [OP]:{4}:{5}",
                             gameObject.name, lastDiceRoll,
                             piece.name, piece.CurrentPosition,
@@ -123,7 +99,7 @@ public class LudoAgent : Agent {
                 game.RequestNextDecision(this);
             }
             else { //if (brain.brainType == BrainType.Internal)
-                StartCoroutine(RequestNextDecisionIn(2f));
+                StartCoroutine(RequestNextDecisionIn(1f));
             }
         }
     }

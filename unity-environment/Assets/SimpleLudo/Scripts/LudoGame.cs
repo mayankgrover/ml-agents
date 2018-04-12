@@ -54,21 +54,20 @@ public class LudoGame : MonoBehaviour
 
         // Game completed
         if(agent.piece1.IsFinished && agent.piece2.IsFinished) {
-            agent.AddReward(1f);
+            agent.SetReward(1f);
             agent.Done();
-            otherAgent.AddReward(-1f);
+            otherAgent.SetReward(-1f);
             otherAgent.Done();
             LudoUI.Instance.IncrementWin(agent.index);
             Debug.LogWarningFormat("[GO] {0}:{1} {2}:{3}",
                 agent.name, agent.GetReward(),
                 otherAgent.name, otherAgent.GetReward());
-            // reset academy
             academy.AcademyReset();
             return true;
         }
 
         // didn't finish the game -0.01
-        agent.AddReward(-0.01f);
+        agent.AddReward(-0.005f);
 
         // Killed another player's piece
         // provided both of the pieces of other agent were not on the same position
@@ -83,11 +82,12 @@ public class LudoGame : MonoBehaviour
                 agent.name, piece.CurrentPosition,
                 otherAgent.name, otherPiece.CurrentPosition);
 
-            agent.AddReward(1f * otherPiece.CurrentPosition/gridSize);
+            //agent.AddReward(1f * otherPiece.CurrentPosition/gridSize);
+            agent.AddReward(0.1f);
             LudoUI.Instance.IncrementKill(agent.index);
 
             otherPiece.MoveTo(0);
-            otherAgent.AddReward(-0.25f);
+            otherAgent.AddReward(-0.1f);
         }
 
         return false;
