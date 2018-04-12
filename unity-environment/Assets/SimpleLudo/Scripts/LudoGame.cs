@@ -65,8 +65,12 @@ public class LudoGame : MonoBehaviour
             academy.AcademyReset();
             return true;
         }
+        // Add reward if this latest move took a piece to finished state
+        //else if (piece.IsFinished) {
+        //    agent.AddReward(0.5f);
+        //}
 
-        // didn't die or kill
+        // didn't finish the game
         agent.AddReward(-0.005f);
 
         // Killed another player's piece
@@ -83,11 +87,11 @@ public class LudoGame : MonoBehaviour
                 otherAgent.name, otherPiece.CurrentPosition);
 
             //agent.AddReward(1f * otherPiece.CurrentPosition/gridSize);
-            agent.AddReward(0.1f);
+            agent.AddReward(0.25f);
             LudoUI.Instance.IncrementKill(agent.index);
 
             otherPiece.MoveTo(0);
-            otherAgent.AddReward(-0.1f);
+            otherAgent.AddReward(-0.25f);
         }
 
         return false;

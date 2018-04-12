@@ -75,21 +75,22 @@ public class LudoAgent : Agent {
                 else {
                     if (otherPiece.CanMove(lastDiceRoll))
                     {
-                        AddReward(-0.01f);
+                        AddReward(-0.05f);
                         Debug.LogWarningFormat("[NA:NP]:{0} [D]:{1} [P]:{4}:{5} [OP]:{2}:{3}",
                             gameObject.name, lastDiceRoll,
                             piece.name, piece.CurrentPosition,
                             otherPiece.name, otherPiece.CurrentPosition);
+
+                        if (piece.IsFinished)
+                        {
+                            AddReward(-0.05f);
+                            Debug.LogWarningFormat("[NA:F]:{0} [D]:{1} [P]:{2}:{3} [OP]:{4}:{5}",
+                                gameObject.name, lastDiceRoll,
+                                piece.name, piece.CurrentPosition,
+                                otherPiece.name, otherPiece.CurrentPosition);
+                        }
                     }
 
-                    //if (piece.IsFinished)
-                    //{
-                    //    AddReward(-0.1f);
-                    //    Debug.LogWarningFormat("[NA:F]:{0} [D]:{1} [P]:{2}:{3} [OP]:{4}:{5}",
-                    //        gameObject.name, lastDiceRoll,
-                    //        piece.name, piece.CurrentPosition,
-                    //        otherPiece.name, otherPiece.CurrentPosition);
-                    //}
                 }
             }
         }
