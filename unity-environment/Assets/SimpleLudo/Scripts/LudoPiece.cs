@@ -36,6 +36,16 @@ public class LudoPiece: MonoBehaviour
         transform.localPosition = localPositionOffset;
     }
 
+    public bool CanDie()
+    {
+        return !IsFinished && !IsSafe();
+    }
+
+    public bool IsSafe()
+    {
+        return CurrentPosition % (game.gridSize / 4) == 0;
+    }
+
     public bool CanMove(int roll)
     {
         return (boardPosition + roll <= game.gridSize);

@@ -76,9 +76,9 @@ public class LudoGame : MonoBehaviour
         // Killed another player's piece
         // provided both of the pieces of other agent were not on the same position
         LudoPiece otherPiece = null;
-        if (!otherAgent.piece1.IsFinished && piece.CurrentPosition == otherAgent.piece1.CurrentPosition)
+        if (otherAgent.piece1.CanDie() && piece.CurrentPosition == otherAgent.piece1.CurrentPosition)
             otherPiece = otherAgent.piece1;
-        if(!otherAgent.piece2.IsFinished && piece.CurrentPosition == otherAgent.piece2.CurrentPosition)
+        if(otherAgent.piece2.CanDie() && piece.CurrentPosition == otherAgent.piece2.CurrentPosition)
             otherPiece = otherAgent.piece2;
 
         if(otherPiece != null && otherAgent.piece1.CurrentPosition != otherAgent.piece2.CurrentPosition) {
@@ -86,7 +86,6 @@ public class LudoGame : MonoBehaviour
                 agent.name, piece.CurrentPosition,
                 otherAgent.name, otherPiece.CurrentPosition);
 
-            //agent.AddReward(1f * otherPiece.CurrentPosition/gridSize);
             agent.AddReward(0.25f);
             LudoUI.Instance.IncrementKill(agent.index);
 
@@ -124,7 +123,7 @@ public class LudoGame : MonoBehaviour
     {
         Vector2 gridPos = BoardToGridPosition(boardPosition);
         Vector2 localPos = GridToLocalPosition(gridPos);
-        Debug.LogFormat("[BoardToLocal] B:{0} G:{1} L:{2}", boardPosition, gridPos.ToString(), localPos.ToString());
+        //Debug.LogFormat("[BoardToLocal] B:{0} G:{1} L:{2}", boardPosition, gridPos.ToString(), localPos.ToString());
         return localPos;
     }
     public Vector2 GridToLocalPosition(Vector2 gridPos)
