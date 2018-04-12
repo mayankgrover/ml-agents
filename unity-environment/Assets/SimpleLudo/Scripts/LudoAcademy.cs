@@ -4,7 +4,7 @@ public class LudoAcademy : Academy
 {
     private bool startGame = true;
     private LudoGame game;
-    private float safePoints = 0;
+    //private float safePoints = 0;
 
     public override void InitializeAcademy()
     {

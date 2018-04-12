@@ -63,9 +63,9 @@ public class LudoAgent : Agent {
                 if (piece.CanMove(lastDiceRoll)) {
                     AddReward(0.01f);
                     piece.MoveForward(lastDiceRoll);
-                    //if (piece.IsSafe()) {
-                    //    AddReward(0.01f);
-                    //}
+                    if (piece.IsSafe()) {
+                        AddReward(0.01f);
+                    }
                     gameFinished = game.UpdateGameState(this, piece);
                     //Debug.LogFormat("[A]:{0} [D]:{1} [P]:{2}:{3} [OP]:{4}:{5}",
                     //    gameObject.name, lastDiceRoll,
