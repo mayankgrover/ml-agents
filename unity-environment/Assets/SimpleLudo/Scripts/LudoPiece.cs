@@ -26,8 +26,8 @@ public class LudoPiece: MonoBehaviour
             gridPosition = game.BoardToGridPosition(boardPosition);
             Vector2 position = game.GridToLocalPosition(gridPosition);
             position += localPositionOffset;
-            //transform.localPosition = position;
-            iTween.MoveTo(gameObject, position, duration);
+            transform.localPosition = position;
+            //iTween.MoveTo(gameObject, position, duration);
         }
     }
 

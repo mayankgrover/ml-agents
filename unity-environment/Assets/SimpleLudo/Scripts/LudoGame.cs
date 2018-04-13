@@ -119,7 +119,7 @@ public class LudoGame : MonoBehaviour
     {
         Vector2 gridPos = BoardToGridPosition(boardPosition);
         Vector2 localPos = GridToLocalPosition(gridPos);
-        //Debug.LogFormat("[BoardToLocal] B:{0} G:{1} L:{2}", boardPosition, gridPos.ToString(), localPos.ToString());
+        Debug.LogFormat("[BoardToLocal] B:{0} G:{1} L:{2}", boardPosition, gridPos.ToString(), localPos.ToString());
         return localPos;
     }
     public Vector2 GridToLocalPosition(Vector2 gridPos)
